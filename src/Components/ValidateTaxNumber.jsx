@@ -1,73 +1,89 @@
-import React from 'react';
+const validateTaxNumber = (taxNumber) => {
+  const cleanedTaxNumber = taxNumber.replace(/\D/g, '');
 
-const ValidateTaxNumber = ({ taxNumber }) => {
-  const validateTaxNumber = (taxNumber) => {
-    taxNumber = taxNumber.replace(/[^\d]+/g, '');
-
-    if (taxNumber.length === 11) {
-      if (!!taxNumber.match(/(\d)\1{10}/)) return false;
-
-      let aux = taxNumber.split('');
-      const validator = aux
-        .filter((digit, index, array) => index >= array.length - 2 && digit)
-        .map((el) => +el);
-
-      const toValidate = (pop) =>
-        aux
-          .filter((digit, index, array) => index < array.length - pop && digit)
-          .map((el) => +el);
-
-      const rest = (count, pop) =>
-        ((toValidate(pop).reduce((sum, el, i) => sum + el * (count - i), 0) *
-          10) %
-          11) %
-        10;
-      return !(rest(10, 2) !== validator[0] || rest(11, 1) !== validator[1]);
-    } else if (taxNumber.length === 14) {
-      if (!!taxNumber.match(/(\d)\1{13}/)) return false;
-
-      const match = taxNumber.toString().match(/\d/g);
-      const numbers = Array.isArray(match) ? match.map(Number) : [];
-
-      if (numbers.length !== 14) return false;
-
-      const items = [...new Set(numbers)];
-
-      if (items.length === 1) return false;
-
-      const calc = (x) => {
-        const slice = numbers.slice(0, x);
-        let factor = x - 7;
-        let sum = 0;
-
-        for (let i = x; i >= 1; i--) {
-          const n = slice[x - i];
-          sum += n * factor--;
-          if (factor < 2) factor = 9;
-        }
-
-        const result = 11 - (sum % 11);
-        return result > 9 ? 0 : result;
-      };
-
-      const digits = numbers.slice(12);
-      const digit0 = calc(12);
-      if (digit0 !== digits[0]) return false;
-
-      const digit1 = calc(13);
-      return digit1 === digits[1];
-    }
+  if (cleanedTaxNumber.length === 11) {
+    return validateCPF(cleanedTaxNumber);
+  } else if (cleanedTaxNumber.length === 14) {
+    return validateCNPJ(cleanedTaxNumber);
+  } else {
     return false;
-  };
+  }
+};
 
-  const isValid = validateTaxNumber(taxNumber);
+const validateCPF = (cpf) => {
+  cpf = cpf.replace(/\D/g, '');
+
+  if (cpf.length !== 11) {
+    return false;
+  }
+
+  if (/^(\d)\1+$/.test(cpf)) {
+    return false;
+  }
+
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cpf.charAt(i)) * (10 - i);
+  }
+  let remainder = 11 - (sum % 11);
+  let verificationDigit1 = remainder > 9 ? 0 : remainder;
+
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cpf.charAt(i)) * (11 - i);
+  }
+  remainder = 11 - (sum % 11);
+  let verificationDigit2 = remainder > 9 ? 0 : remainder;
 
   return (
-    <div>
-      <p>{`Tax Number: ${taxNumber}`}</p>
-      <p>{`Is Valid: ${isValid}`}</p>
-    </div>
+    verificationDigit1 === parseInt(cpf.charAt(9)) &&
+    verificationDigit2 === parseInt(cpf.charAt(10))
   );
 };
 
-export default ValidateTaxNumber;
+const validateCNPJ = (cnpj) => {
+  cnpj = cnpj.replace(/\D/g, '');
+
+  if (cnpj.length !== 14) {
+    return false;
+  }
+
+  if (/^(\d)\1+$/.test(cnpj)) {
+    return false;
+  }
+
+  let size = cnpj.length - 2;
+  let numbers = cnpj.substring(0, size);
+  let digits = cnpj.substring(size);
+  let sum = 0;
+  let position = size - 7;
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(numbers.charAt(size - i)) * position--;
+    if (position < 2) {
+      position = 9;
+    }
+  }
+  let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (result !== parseInt(digits.charAt(0))) {
+    return false;
+  }
+
+  size = size + 1;
+  numbers = cnpj.substring(0, size);
+  sum = 0;
+  position = size - 7;
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(numbers.charAt(size - i)) * position--;
+    if (position < 2) {
+      position = 9;
+    }
+  }
+  result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (result !== parseInt(digits.charAt(1))) {
+    return false;
+  }
+
+  return true;
+};
+
+export default validateTaxNumber;

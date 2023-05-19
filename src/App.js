@@ -8,21 +8,10 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <i> CPF VALIDATOR</i>
-        <img src={logo} className="App-logo" alt="logo" />
-     
-          <div className="input-group">
-            <label for="inputCheck" className="labelCheck"></label>
-            <CpfCnpjField/>
-          </div>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <CpfCnpjField />
+        <div className="App-end">
+          <p> Powered by Kennedy Cordeiro</p>
+        </div>
       </header>
     </div>
   );
