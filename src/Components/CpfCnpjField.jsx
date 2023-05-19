@@ -64,7 +64,7 @@ const CpfCnpjField = () => {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ alignSelf: "flex-start", marginBottom: message ? '8px' : '0'}}>
+          <div style={{ alignSelf: "flex-start", marginBottom: message ? '2px' : '0'}}>
             <TextField
               label="Insira um CPF ou CNPJ"
               variant="outlined"
